@@ -1,3 +1,4 @@
+# importing the required libraries
 import pygame, sys, time
 
 pygame.init()
@@ -8,6 +9,8 @@ pygame.display.set_caption('Tic Tac Toe AI')
 width, height = 300,300
 game_window = pygame.display.set_mode((width, height))
 
+# 1 = X
+# -1 = O
 player = "X"
 board = [0]*9
 
@@ -31,6 +34,28 @@ def evaluate(board, turn):
     for pos in ([0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]):  # Go through all possible winning lines
         if board[pos[0]] == board[pos[1]] == board[pos[2]] == turn: 
             return 1  # Return 1 if player turn has 3 in a row
+        
+# AI
+def negamax(board, depth, turn):
+    if evaluate(board, turn): return 0, (9+depth)  # Return positive score if maximizing player
+    
+    if evaluate(board, -turn): return 0, -(9 + depth)  # Return negative score if minimizing player wins
+    
+    if 0 not in board: return 0, 0  # Drawn game, return 0
+    
+    best_score = -20  # Initiate with less than smallest possible score
+    
+    for move in [i for i in range(9) if not board[i]]:  # Go through all empty squares on board
+        
+        board[move] = turn  # Make move
+        
+        score = -negamax(board, depth - 1, -turn)[1]  # Recursive call to go through all child nodes
+        
+        board[move] = 0  # Unmake the move
+        
+        if score > best_score: 
+            best_score, best_move = score, move  # If score is larger than previous best, update score
+    return best_move, best_score  # Return the best move and its corresponding score
         
 def game_over(player):
     game_window.fill(black)
@@ -56,24 +81,22 @@ def game_over_draw():
     pygame.quit()
     sys.exit()
 
-def make_move(move,posx,posy):
+def make_move(player,move,posx,posy):
     global board
-    global player
     
     if player == "X":
         game_window.blit(x_img, (posy,posx))
-        board[move] = "X"
-        if evaluate(board,"X"):
+        board[move] = 1
+        if evaluate(board,1):
             print("Game Over, X wins.")
             game_over("X")
-        player = "O"
     else:
         game_window.blit(o_img, (posy,posx))
-        board[move] = "O"
-        if evaluate(board,"O"):
+        board[move] = -1
+        if evaluate(board,-1):
             print("Game Over, O wins.")
             game_over("O")
-        player = "X"
+    
     if 0 not in board:
         game_over_draw()
 
@@ -86,9 +109,12 @@ while True:
             sys.exit()
             
         if event.type == pygame.MOUSEBUTTONDOWN:
+            run_ai_move = True
+            
             mouseX, mouseY = pygame.mouse.get_pos()
             column, row = 0, 0
             
+            # Human Move
             if mouseY > 100:
                 column = 1
                 if mouseY > 200:
@@ -104,7 +130,39 @@ while True:
             
             move = row + column*3
             
-            make_move(move,posx,posy)
+            if board[move] ==  0:
+                make_move("X",move,posx,posy)
+            else:
+                run_ai_move = False
+                            
+            # AI Move
+            if run_ai_move:
+                ai_move = negamax(board, 9, -1)[0]
+
+                # Translate move into rows and columns
+                if ai_move == 0:
+                    ai_row, ai_column = 0, 0
+                if ai_move == 1:
+                    ai_row, ai_column = 1, 0
+                if ai_move == 2:
+                    ai_row, ai_column = 2, 0
+                if ai_move == 3:
+                    ai_row, ai_column = 0, 1
+                if ai_move == 4:
+                    ai_row, ai_column = 1, 1
+                if ai_move == 5:
+                    ai_row, ai_column = 2, 1
+                if ai_move == 6:
+                    ai_row, ai_column = 0, 2
+                if ai_move == 7:
+                    ai_row, ai_column = 1, 2
+                if ai_move == 8:
+                    ai_row, ai_column = 2, 2
+
+                ai_posy = ai_row*100 + 7
+                ai_posx = ai_column*100 + 7
+
+                make_move("O",ai_move,ai_posx,ai_posy)
                 
     pygame.display.update()
     fps_controller.tick(100)
