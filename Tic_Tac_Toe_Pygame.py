@@ -1,4 +1,4 @@
-# importing the required libraries
+# This is not an AI implementation, this is just the base game. I will add AI later.
 import pygame, sys, time
 
 pygame.init()
