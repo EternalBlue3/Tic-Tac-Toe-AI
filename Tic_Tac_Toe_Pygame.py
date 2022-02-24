@@ -1,4 +1,3 @@
-# This is not an AI implementation, this is just the base game. I will add AI later.
 import pygame, sys, time
 
 pygame.init()
@@ -44,6 +43,18 @@ def game_over(player):
     time.sleep(2)
     pygame.quit()
     sys.exit()
+    
+def game_over_draw():
+    game_window.fill(black)
+    my_font = pygame.font.SysFont('times new roman', 40)
+    game_over_surface = my_font.render(f'Draw', True, red)
+    game_over_rect = game_over_surface.get_rect()
+    game_over_rect.midtop = (width/2, height/4)
+    game_window.blit(game_over_surface, game_over_rect)
+    pygame.display.flip()
+    time.sleep(2)
+    pygame.quit()
+    sys.exit()
 
 def make_move(move,posx,posy):
     global board
@@ -63,6 +74,8 @@ def make_move(move,posx,posy):
             print("Game Over, O wins.")
             game_over("O")
         player = "X"
+    if 0 not in board:
+        game_over_draw()
 
 while True:
     for event in pygame.event.get():
