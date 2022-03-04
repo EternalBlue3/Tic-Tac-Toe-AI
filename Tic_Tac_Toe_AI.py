@@ -34,6 +34,13 @@ def evaluate(board, turn):
     for pos in ([0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]):  # Go through all possible winning lines
         if board[pos[0]] == board[pos[1]] == board[pos[2]] == turn: 
             return 1  # Return 1 if player turn has 3 in a row
+
+def possible_moves(board):
+    returns = []
+    for x in range(len(board)):
+        if board[x] == 0:
+            returns.append(x)
+    return returns
         
 # AI
 def negamax(board, depth, turn):
@@ -42,6 +49,9 @@ def negamax(board, depth, turn):
     if evaluate(board, -turn): return 0, -(9 + depth)  # Return negative score if minimizing player wins
     
     if 0 not in board: return 0, 0  # Drawn game, return 0
+    
+    if depth == 0:
+        return possible_moves(board)[0], (4+depth)
     
     best_score = -20  # Initiate with less than smallest possible score
     
@@ -86,14 +96,18 @@ def make_move(player,move,posx,posy):
     
     if player == "X":
         game_window.blit(x_img, (posy,posx))
+        pygame.display.update()
         board[move] = 1
         if evaluate(board,1):
+            time.sleep(0.1)
             print("Game Over, X wins.")
             game_over("X")
     else:
         game_window.blit(o_img, (posy,posx))
+        pygame.display.update()
         board[move] = -1
         if evaluate(board,-1):
+            time.sleep(0.1)
             print("Game Over, O wins.")
             game_over("O")
     
